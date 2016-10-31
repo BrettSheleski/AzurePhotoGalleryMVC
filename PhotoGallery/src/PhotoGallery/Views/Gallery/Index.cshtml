@@ -1,0 +1,110 @@
+﻿@model PhotoGallery.Gallery.IndexViewModel
+@{
+    ViewBag.Title = Model.Name;
+}
+@section styles{
+    <style type="text/css">
+        @@media (min-width: 768px) {
+            .item img {
+                max-height: 100px;
+            }
+        }
+
+        .item-picture {
+            height: 160px;
+        }
+
+        .thumbnail img{
+            border-radius:5px;
+        }
+
+    </style>
+}
+@section scripts{
+    <script src="~/lib/jquery_lazyload/jquery.lazyload.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("img.lazy").lazyload({
+                effect: "fadeIn",
+                threshold: 200
+            });
+
+            $(".fb-comments").attr("data-href", window.location.href);
+        })
+    </script>
+}
+<div id="fb-root"></div>
+<script>
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=@Config.FacebookAppId";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+<ol class="breadcrumb">
+    <li>
+        <a href="@Url.Action("Index", "Gallery")">
+            Home
+        </a>
+    </li>
+    @{
+        if (Model.Path != null)
+        {
+            string totalPath = "";
+            var pathParts = Model.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < pathParts.Length; ++i)
+            {
+                totalPath = (i == 0) ? pathParts[i] : string.Join("/", totalPath, pathParts[i]);
+                <li class="@(i == (pathParts.Length - 1) ? "active": "")">
+                    <a href="@(Url.Action("Index", "Gallery", new { Path = totalPath + '/' }))">
+                        @pathParts[i]
+                    </a>
+                </li>
+            }
+        }
+    }
+</ol>
+<h2>@Html.DisplayFor(m => m.Name)</h2>
+<div>
+    <ul class="row list-unstyled">
+        @foreach (var dir in Model.Directories)
+        {
+            <li class="col-xs-6 col-sm-4 col-md-3 item item-directory">
+                <a href="@(Url.Action("Index", "Gallery", new { Path = dir.Path }))" class="thumbnail">
+                    @if (dir.Thumbnail != null)
+                    {
+                        <img src="@dir.Thumbnail.Url" alt="@dir.Thumbnail.Name thumbnail" />
+                    }
+                    else
+                    {
+                        <img src="http://placehold.it/100x100" alt="placeholder" />
+                    }
+                    <p class="text-center">
+                        <span>@Html.DisplayFor(m => dir.Name)</span>
+                    </p>
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+
+<div>
+    <ul class="row list-unstyled">
+        @foreach (var item in Model.Items)
+        {
+            <li class="col-sm-4 col-md-3 item item-picture">
+                <a href="@Url.Action("Picture", "Gallery", new { Path = item.Path })" class="thumbnail">
+                    <img class="lazy" data-original="@item.Url" />
+                    <noscript>
+                        <img src="@item.Url" />
+                    </noscript>
+                    <p class="text-center">
+                        <span>@Html.DisplayFor(m => item.Name)</span>
+                    </p>
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+<div class="fb-comments" data-numposts="5" data-width="100%" data-href="http://pictures.sheleski.com"></div>

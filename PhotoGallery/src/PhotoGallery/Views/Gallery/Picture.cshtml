@@ -1,0 +1,94 @@
+﻿@model PhotoGallery.Gallery.PictureViewModel
+@{
+    ViewBag.Title = Model.Name;
+}
+@section styles{
+    <style type="text/css">
+        .thumbnail img {
+            border-radius: 5px;
+        }
+    </style>
+}
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $(".fb-comments").attr("data-href", window.location.href);
+        })
+    </script>
+}
+<script>
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=@Config.FacebookAppId";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+<ol class="breadcrumb">
+    <li>
+        <a href="@Url.Action("Index", "Gallery")">
+            Home
+        </a>
+    </li>
+    @{
+        if (Model.Path != null)
+        {
+            string totalPath = "";
+            var pathParts = Model.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < pathParts.Length; ++i)
+            {
+                totalPath = (i == 0) ? pathParts[i] : string.Join("/", totalPath, pathParts[i]);
+                <li class="@(i == (pathParts.Length - 1) ? "active": "")">
+                    <a href="@(Url.Action("Index", "Gallery", new { Path = totalPath + '/' }))">
+                        @pathParts[i]
+                    </a>
+                </li>
+            }
+        }
+    }
+</ol>
+<h2>@Model.Picture.Name</h2>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div class="thumbnail text-center">
+            <img src="@Model.Picture.Url" alt="@Model.Picture.Name" />
+            <div class="row">
+                <div class="col-xs-2">
+                    @*<a href="#">
+                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                    </a>*@
+                </div>
+                <div class="col-xs-8">
+                    
+                    <div>
+                        <strong>
+                            @Html.DisplayFor(m => m.Picture.Name)
+                        </strong>
+                    </div>
+                    <div>
+                        <small>
+                            <em>
+                                <a href="@Model.OriginalPictureUrl" target="_blank">
+                                    View Original
+                                </a>
+                            </em>
+                        </small>
+
+                    </div>
+                </div>
+                <div class="col-xs-2 text-center">
+                    @*<a href="#">
+                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                    </a>*@
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="fb-comments" data-numposts="5" data-width="100%" data-href="http://pictures.sheleski.com"></div>
+    </div>
+</div>
+
+
