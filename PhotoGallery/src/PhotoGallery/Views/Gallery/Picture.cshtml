@@ -16,14 +16,18 @@
         })
     </script>
 }
-<script>
-    (function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=@Config.FacebookAppId";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));</script>
+@section metadata{
+    @{
+        var path = Url.Action("Picture", "Gallery", new { path = Model.Path });
+        var absUrl = string.Format("{0}://{1}{2}", Context.Request.Scheme, Context.Request.Host, path);
+        var absUri = new Uri(absUrl, UriKind.Absolute);
+    }
+    <meta property="og:url" content="@absUri.ToString()" />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="@Model.Picture.Url" />
+    <meta property="og:image:secure_url" content="@Model.Picture.Url" />
+    <meta property="og:title" content="Sheleski Pictures" />
+}
 <ol class="breadcrumb">
     <li>
         <a href="@Url.Action("Index", "Gallery")">
@@ -56,15 +60,16 @@
             <div class="row">
                 <div class="col-xs-2">
                     @*<a href="#">
-                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
-                    </a>*@
+                            <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                        </a>*@
                 </div>
                 <div class="col-xs-8">
-                    
+
                     <div>
                         <strong>
                             @Html.DisplayFor(m => m.Picture.Name)
                         </strong>
+
                     </div>
                     <div>
                         <small>
@@ -79,12 +84,15 @@
                 </div>
                 <div class="col-xs-2 text-center">
                     @*<a href="#">
-                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                    </a>*@
+                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                        </a>*@
                 </div>
             </div>
-
-
+        </div>
+        <div class="text-center">
+            <div class="fb-share-button" data-layout="button" data-size="large" data-mobile-iframe="true">
+                <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u&amp;src=sdkpreparse">Share</a>
+            </div>
         </div>
 
         <div class="fb-comments" data-numposts="5" data-width="100%" data-href="http://pictures.sheleski.com"></div>

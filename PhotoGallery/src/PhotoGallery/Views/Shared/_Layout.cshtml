@@ -1,8 +1,11 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
+<head prefix="og: http://ogp.me/ns#">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @RenderSection("metadata", required: false)
+    <meta property="og:description" content="Pictures of the Sheleski Family" />
+    <meta property="fb:app_id" content="@Config.FacebookAppId" />
     <title>
         @{
             string title = ViewData["Title"] as string;
@@ -28,6 +31,14 @@
     @RenderSection("styles", required: false)
 </head>
 <body>
+    <script>
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=@Config.FacebookAppId";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
     <div class="navbar navbar-inverse">
         <div class="container">
             <div class="navbar-header">

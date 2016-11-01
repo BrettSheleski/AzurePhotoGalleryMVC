@@ -25,12 +25,21 @@ namespace PhotoGallery.Gallery
 
             var container = blobClient.GetContainerReference(Config.AzureOriginalImageContainerName);
 
+            var largeImageContainer = blobClient.GetContainerReference(Config.AzureLargeImageContainerName);
+
+
+
+
+
+
             var thumbnailContainer = blobClient.GetContainerReference(Config.AzureThumbnailImageContainerName);
 
             await container.CreateIfNotExistsAsync();
+            await largeImageContainer.CreateIfNotExistsAsync();
             await thumbnailContainer.CreateIfNotExistsAsync();
 
             await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+            await largeImageContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
             await thumbnailContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
 
             var items = container.ListBlobs(prefix: Path);
@@ -45,6 +54,24 @@ namespace PhotoGallery.Gallery
                 Directory = dir
             }).OrderBy(x => x.Name));
 
+            var sharePicture = container.ListBlobs(prefix: Path, useFlatBlobListing: true).OfType<CloudBlockBlob>().OrderBy(x => Guid.NewGuid()).Take(1).FirstOrDefault();
+
+            if (sharePicture != null)
+            {
+                var largePicture = largeImageContainer.GetBlockBlobReference(sharePicture.Name);
+
+                if (!await largePicture.ExistsAsync())
+                {
+                    copyTasks.Add(ResizeAndCopyAsync(sharePicture, largePicture, 960, 540));
+                }
+
+                this.SharePicture = new ItemInfo
+                {
+                    Name = System.IO.Path.GetFileNameWithoutExtension(largePicture.Name.Split('/').Last()),
+                    Url = largePicture.Uri,
+                    Path = largePicture.Name
+                };
+            }
 
             foreach (var dir in Directories)
             {
@@ -90,6 +117,7 @@ namespace PhotoGallery.Gallery
 
         public List<DirectoryInfo> Directories { get; } = new List<DirectoryInfo>();
         public List<ItemInfo> Items { get; } = new List<ItemInfo>();
+        public ItemInfo SharePicture { get; private set; }
 
         public class DirectoryInfo
         {

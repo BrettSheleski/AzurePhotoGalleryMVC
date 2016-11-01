@@ -2,22 +2,35 @@
 @{
     ViewBag.Title = Model.Name;
 }
+@section metadata{
+    <meta property="og:type" content="article" />@{
+        var path = Url.Action("Index", "Gallery", new { path = Model.Path });
+        var absUrl = string.Format("{0}://{1}{2}", Context.Request.Scheme, Context.Request.Host, path);
+        var absUri = new Uri(absUrl, UriKind.Absolute);
+    }
+    <meta property="og:url" content="@absUri.ToString()" />
+    <meta property="og:title" content="@(string.IsNullOrWhiteSpace(Model.Name) ? "" : $"{Model.Name} - ") Sheleski Pictures" />
+    @if (Model.SharePicture != null)
+    {
+        <meta property="og:image" content="@Model.SharePicture.Url" />
+        <meta property="og:image:secure_url" content="@Model.SharePicture.Url" />
+    }
+}
 @section styles{
     <style type="text/css">
         @@media (min-width: 768px) {
             .item img {
                 max-height: 100px;
             }
+
+            .item-picture {
+                height: 160px;
+            }
         }
 
-        .item-picture {
-            height: 160px;
+        .thumbnail img {
+            border-radius: 5px;
         }
-
-        .thumbnail img{
-            border-radius:5px;
-        }
-
     </style>
 }
 @section scripts{
@@ -33,15 +46,6 @@
         })
     </script>
 }
-<div id="fb-root"></div>
-<script>
-    (function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=@Config.FacebookAppId";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));</script>
 <ol class="breadcrumb">
     <li>
         <a href="@Url.Action("Index", "Gallery")">
@@ -106,5 +110,10 @@
             </li>
         }
     </ul>
+</div>
+<div class="text-center">
+    <div class="fb-share-button" data-layout="button" data-size="large" data-mobile-iframe="true">
+        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u&amp;src=sdkpreparse">Share</a>
+    </div>
 </div>
 <div class="fb-comments" data-numposts="5" data-width="100%" data-href="http://pictures.sheleski.com"></div>
