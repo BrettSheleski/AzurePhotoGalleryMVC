@@ -29,14 +29,10 @@ namespace PhotoGallery.Gallery
             var blobClient = account.CreateCloudBlobClient();
 
             var container = blobClient.GetContainerReference(Config.AzureOriginalImageContainerName);
-
-            var largeImageContainer = blobClient.GetContainerReference(Config.AzureLargeImageContainerName);
-
+            
             await container.CreateIfNotExistsAsync();
-            await largeImageContainer.CreateIfNotExistsAsync();
 
             await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-            await largeImageContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
 
             var originalPicture = container.GetBlockBlobReference(Path);
 
@@ -45,18 +41,11 @@ namespace PhotoGallery.Gallery
             if (this.Exists)
             {
                 this.OriginalPictureUrl = originalPicture.Uri;
-                CloudBlockBlob largePicture = largeImageContainer.GetBlockBlobReference(originalPicture.Name);
-
-                if (!await largePicture.ExistsAsync())
-                {
-                    await ResizeAndCopyAsync(originalPicture, largePicture, 960, 540);
-                }
-
+                
                 this.Picture = new ItemInfo
                 {
-                    Path = largePicture.Name,
-                    Name = largePicture.Name.Split('/').Last(),
-                    Url = largePicture.Uri
+                    Path = originalPicture.Name,
+                    Name = originalPicture.Name.Split('/').Last()
                 };
             }
         }

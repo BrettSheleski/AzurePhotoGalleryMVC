@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -14,7 +15,7 @@ namespace PhotoGallery
         {
             get
             {
-                return Configuration?.GetValue<string>(nameof(AzureStorageConnectionString));
+                return GetFromConfig();
             }
         }
 
@@ -22,7 +23,7 @@ namespace PhotoGallery
         {
             get
             {
-                return Configuration?.GetValue<string>(nameof(AzureOriginalImageContainerName));
+                return GetFromConfig();
             }
         }
 
@@ -30,7 +31,7 @@ namespace PhotoGallery
         {
             get
             {
-                return Configuration?.GetValue<string>(nameof(AzureThumbnailImageContainerName));
+                return GetFromConfig();
             }
         }
 
@@ -38,7 +39,7 @@ namespace PhotoGallery
         {
             get
             {
-                return Configuration?.GetValue<string>(nameof(AzureLargeImageContainerName));
+                return GetFromConfig();
             }
         }
 
@@ -46,8 +47,53 @@ namespace PhotoGallery
         {
             get
             {
-                return Configuration?.GetValue<string>(nameof(FacebookAppId));
+                return GetFromConfig();
             }
+        }
+
+        public static int ThumbnailWidth
+        {
+            get
+            {
+                return GetFromConfig<int>();
+            }
+        }
+
+        public static int ThumbnailHeight
+        {
+            get
+            {
+                return GetFromConfig<int>();
+            }
+        }
+
+        public static int LargeImageWidth
+        {
+            get
+            {
+                return GetFromConfig<int>();
+            }
+        }
+
+        public static int LargeImageHeight
+        {
+            get
+            {
+                return GetFromConfig<int>();
+            }
+        }
+
+        static T GetFromConfig<T>([CallerMemberName] string name = null)
+        {
+            if (Configuration == null)
+                throw new InvalidOperationException();
+
+            return Configuration.GetValue<T>(name);
+        }
+
+        static string GetFromConfig([CallerMemberName] string name = null)
+        {
+            return GetFromConfig<string>(name);
         }
 
     }

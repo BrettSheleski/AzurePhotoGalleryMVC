@@ -12,6 +12,8 @@ namespace PhotoGallery.Gallery
 {
     public class GalleryController : Controller
     {
+        const int TEN_DAYS_SECONDS = 60 * 60 * 24 * 10;
+
         [NonAction]
         public Task<IActionResult> Index()
         {
@@ -38,6 +40,42 @@ namespace PhotoGallery.Gallery
             await vm.PrepareForViewAsync();
 
             return View(vm);
+        }
+
+        [ResponseCache(Duration = TEN_DAYS_SECONDS, VaryByHeader = "path")]
+        public async Task<IActionResult> GetThumbnail(string path)
+        {
+            var vm = new GetThumbnailViewModel();
+
+            var uri = await vm.GetThumbnailUriAsync(path);
+
+            if (uri != null)
+            {
+                return Redirect(uri.AbsoluteUri);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        
+
+        [ResponseCache(Duration = TEN_DAYS_SECONDS, VaryByHeader = "path")]
+        public async Task<IActionResult> GetLargePicture(string path)
+        {
+            var vm = new GetThumbnailViewModel();
+
+            var uri = await vm.GetLargeImageUriAsync(path);
+
+            if (uri != null)
+            {
+                return Redirect(uri.AbsoluteUri);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }

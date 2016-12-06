@@ -12,19 +12,15 @@
     <meta property="og:title" content="@(string.IsNullOrWhiteSpace(Model.Name) ? "" : $"{Model.Name} - ") Sheleski Pictures" />
     @if (Model.SharePicture != null)
     {
-        <meta property="og:image" content="@Model.SharePicture.Url" />
-        <meta property="og:image:secure_url" content="@Model.SharePicture.Url" />
+        <meta property="og:image" content="@(Url.Action("GetThumbnail", "Gallery", new { Path = Model.SharePicture.Path }))" />
+        <meta property="og:image:secure_url" content="@(Url.Action("GetThumbnail", "Gallery", new { Path = Model.SharePicture.Path }))" />
     }
 }
 @section styles{
     <style type="text/css">
         @@media (min-width: 768px) {
             .item img {
-                max-height: 100px;
-            }
-
-            .item-picture {
-                height: 160px;
+                height: 100px;
             }
         }
 
@@ -78,7 +74,7 @@
                 <a href="@(Url.Action("Index", "Gallery", new { Path = dir.Path }))" class="thumbnail">
                     @if (dir.Thumbnail != null)
                     {
-                        <img src="@dir.Thumbnail.Url" alt="@dir.Thumbnail.Name thumbnail" />
+                        <img src="@(Url.Action("GetThumbnail", "Gallery", new { Path = dir.Thumbnail.Path }))" alt="@dir.Thumbnail.Name thumbnail" />
                     }
                     else
                     {
@@ -99,9 +95,9 @@
         {
             <li class="col-sm-4 col-md-3 item item-picture">
                 <a href="@Url.Action("Picture", "Gallery", new { Path = item.Path })" class="thumbnail">
-                    <img class="lazy" data-original="@item.Url" />
+                    <img class="lazy" src="@(Url.Content("~/images/loading.svg"))" data-original="@Url.Action("GetThumbnail", "Gallery", new { Path = item.Path })" />
                     <noscript>
-                        <img src="@item.Url" />
+                        <img src="@Url.Action("GetThumbnail", "Gallery", new { Path = item.Path })" />
                     </noscript>
                     <p class="text-center">
                         <span>@Html.DisplayFor(m => item.Name)</span>

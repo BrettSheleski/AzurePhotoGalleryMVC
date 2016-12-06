@@ -43,10 +43,7 @@ namespace PhotoGallery.Gallery
             await thumbnailContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
 
             var items = container.ListBlobs(prefix: Path);
-
-            List<Task> copyTasks = new List<Task>();
-            CloudBlockBlob thumb;
-
+            
             Directories.AddRange(items.OfType<CloudBlobDirectory>().Select(dir => new DirectoryInfo
             {
                 Name = dir.Prefix.Split('/').Reverse().Skip(1).Take(1).FirstOrDefault(),
@@ -59,16 +56,10 @@ namespace PhotoGallery.Gallery
             if (sharePicture != null)
             {
                 var largePicture = largeImageContainer.GetBlockBlobReference(sharePicture.Name);
-
-                if (!await largePicture.ExistsAsync())
-                {
-                    copyTasks.Add(ResizeAndCopyAsync(sharePicture, largePicture, 960, 540));
-                }
-
+                
                 this.SharePicture = new ItemInfo
                 {
                     Name = System.IO.Path.GetFileNameWithoutExtension(largePicture.Name.Split('/').Last()),
-                    Url = largePicture.Uri,
                     Path = largePicture.Name
                 };
             }
@@ -76,41 +67,18 @@ namespace PhotoGallery.Gallery
             foreach (var dir in Directories)
             {
                 var blob = dir.Directory.ListBlobs(useFlatBlobListing: true).OfType<CloudBlockBlob>().OrderBy(x => Guid.NewGuid()).Take(1).FirstOrDefault();
-
-                thumb = thumbnailContainer.GetBlockBlobReference(blob.Name);
-
-                if (!await thumb.ExistsAsync())
-                {
-                    copyTasks.Add(ResizeAndCopyAsync(blob, thumb, 150, 150));
-                }
-
+                
                 dir.Thumbnail = new ItemInfo
                 {
-                    Name = System.IO.Path.GetFileNameWithoutExtension(thumb.Name.Split('/').Last()),
-                    Url = thumb.Uri,
-                    Path = thumb.Name
+                    Name = System.IO.Path.GetFileNameWithoutExtension(blob.Name.Split('/').Last()),
+                    Path = blob.Name
                 };
             }
 
             var pictures = items.OfType<CloudBlockBlob>().ToList();
-
-            List<CloudBlockBlob> thumbnailBlobs = new List<CloudBlockBlob>();
-
-            foreach (var pic in pictures)
-            {
-                thumb = thumbnailContainer.GetBlockBlobReference(pic.Name);
-
-                thumbnailBlobs.Add(thumb);
-
-                if (!await thumb.ExistsAsync())
-                {
-                    copyTasks.Add(ResizeAndCopyAsync(pic, thumb, 150, 150));
-                }
-            }
-
-            Task.WaitAll(copyTasks.ToArray());
-
-            Items.AddRange(thumbnailBlobs.Select(blob => new ItemInfo { Name = System.IO.Path.GetFileNameWithoutExtension(blob.Name.Split('/').Last()), Url = blob.Uri, Path = blob.Name }).OrderBy(x => x.Name));
+            
+            
+            Items.AddRange(pictures.Select(blob => new ItemInfo { Name = System.IO.Path.GetFileNameWithoutExtension(blob.Name.Split('/').Last()), Path = blob.Name }).OrderBy(x => x.Name));
 
             await base.PrepareForViewAsync();
         }
